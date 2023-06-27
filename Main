@@ -1,0 +1,49 @@
+import cv2
+import numpy as np
+
+
+# задаем параметры видео
+FPS = 24
+VIDEO_WIDTH = 100
+VIDEO_HEIGHT = 100
+
+# задаем текст для бегущей строки
+text = input("Введите текст для бегущей строки: ")
+
+# создаем видео-файл
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+video_path = "output.mp4"
+out = cv2.VideoWriter(video_path, fourcc, FPS, (VIDEO_WIDTH, VIDEO_HEIGHT))
+
+# задаем начальные значения для бегущей строки
+font = cv2.FONT_HERSHEY_SIMPLEX
+font_size = 2
+text_color = (0, 255, 255)
+line_type = 2
+text_position = (VIDEO_WIDTH, VIDEO_HEIGHT // 2)
+
+# создаем видео-файл с бегущей строкой
+while True:
+    # создаем пустое изображение
+    frame = np.zeros((VIDEO_HEIGHT, VIDEO_WIDTH, 3), np.uint8)
+
+    # определяем размер текста и его позицию
+    (text_width, text_height), _ = cv2.getTextSize(text, font, font_size, line_type)
+    text_position = (text_position[0] - 10, text_position[1])
+
+    # выводим текст на изображение
+    frame = cv2.putText(frame, text, text_position, font, font_size, text_color, line_type)
+
+    # записываем кадр в видео-файл
+    out.write(frame)
+
+    # если бегущая строка прошла через всю ширину изображения, выходим из цикла
+    if text_position[0] + text_width < 0:
+        break
+
+# освобождаем ресурсы и закрываем видео-файл
+out.release()
+cv2.destroyAllWindows()
+
+# выводим сообщение об успешном создании видео-файла
+print("end")
