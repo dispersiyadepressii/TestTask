@@ -2,32 +2,29 @@ import cv2
 import numpy as np
 
 
-# задаем параметры видео
+#параметры видео
 FPS = 24
 VIDEO_WIDTH = 100
 VIDEO_HEIGHT = 100
 
-# задаем текст для бегущей строки
+#текст для бегущей строки
 text = input("Введите текст для бегущей строки: ")
 
-# создаем видео-файл
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 video_path = "output.mp4"
 out = cv2.VideoWriter(video_path, fourcc, FPS, (VIDEO_WIDTH, VIDEO_HEIGHT))
 
-# задаем начальные значения для бегущей строки
 font = cv2.FONT_HERSHEY_SIMPLEX
 font_size = 2
 text_color = (0, 255, 255)
 line_type = 2
 text_position = (VIDEO_WIDTH, VIDEO_HEIGHT // 2)
 
-# создаем видео-файл с бегущей строкой
 while True:
-    # создаем пустое изображение
+    #пустое изображение
     frame = np.zeros((VIDEO_HEIGHT, VIDEO_WIDTH, 3), np.uint8)
 
-    # определяем размер текста и его позицию
+    #размер текста и его позицию
     (text_width, text_height), _ = cv2.getTextSize(text, font, font_size, line_type)
     text_position = (text_position[0] - 10, text_position[1])
 
@@ -45,5 +42,43 @@ while True:
 out.release()
 cv2.destroyAllWindows()
 
-# выводим сообщение об успешном создании видео-файла
 print("end")
+
+#функция обрезки видео по длительности
+def truncate_video(video_path, max_duration=3):
+    cap = cv2.VideoCapture(video_path)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    duration = frame_count / fps
+
+    if duration <= max_duration:
+        return  # Video is already within the desired duration
+
+    target_frame_count = int(max_duration * fps)
+    target_duration = target_frame_count / fps
+
+    temp_video_path = "temp_video.mp4"
+    temp_writer = cv2.VideoWriter(temp_video_path, cv2.VideoWriter_fourcc(*"mp4v"), fps,
+                                  (int(cap.get(3)), int(cap.get(4))))
+
+    for frame_no in range(target_frame_count):
+        success, frame = cap.read()
+        if success:
+            temp_writer.write(frame)
+        else:
+            break
+
+    cap.release()
+    temp_writer.release()
+
+    # Rename the temp video file to the original file
+    import os
+    os.remove(video_path)
+    os.rename(temp_video_path, video_path)
+
+    print("Video duration truncated to", target_duration, "seconds.")
+
+
+
+truncate_video("output.mp4", max_duration=3)
+
