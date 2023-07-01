@@ -82,3 +82,23 @@ def truncate_video(video_path, max_duration=3):
 
 truncate_video("output.mp4", max_duration=3)
 
+#создание таблицы
+import sqlite3
+
+db = sqlite3.connect('databaseofrequests.db')
+
+with sqlite3.connect('databaseofrequests.db') as db:
+    cursor = db.cursor()
+    query = """ CREATE TABLE IF NOT EXISTS requests(request TEXT) """
+    cursor.execute(query)
+    db.commit()
+
+
+with sqlite3.connect('databaseofrequests.db') as db:
+    cursor = db.cursor()
+    query = ["INSERT INTO requests(request) VALUES('",text,"')"]
+    query = ' '.join(query)
+    print(query)
+    cursor.execute(query)
+    db.commit()
+
